@@ -29,7 +29,7 @@ func home() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" style=\"font-family: monospace; max-width: 60ch; margin: 0 auto; padding: 2ch; min-height: 100vh; \"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Document</title><meta name=\"color-scheme\" content=\"light dark\"><meta name=\"description\" content=\"Atomic Application App helps to write custom resumes and cover letters\"><style>\r\n        * {\r\n            line-height: 200%;\r\n            margin: 2ch 0;\r\n        }\r\n\r\n        @media (prefers-color-scheme:dark) {\r\n            a {\r\n                color: yellow;\r\n            }\r\n        }\r\n    </style></head><body><br><header><br><nav><a href=\"#drafts\">#drafts</a> <a href=\"#signals\">#signals</a> <a href=\"#intel\">#intel</a></nav><br></header><br><main><br><h1>Atomic Applications</h1><br><hr><br><section id=\"drafts\"><br>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header><br><nav><a href=\"#drafts\">#drafts</a> <a href=\"#signals\">#signals</a> <a href=\"#intel\">#intel</a></nav><br></header><br><main><br><h1>Atomic Applications</h1><br><hr><br><section id=\"drafts\"><br><h2><a href=\"/drafts\">Drafts</a></h2><br>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -37,7 +37,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<br></section><br><hr><br><section id=\"signals\"><br>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<br></section><br><hr><br><section id=\"signals\"><br><h2><a href=\"/signals\">Signals</a></h2><br>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,7 +45,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<br></section><br><hr><br><section id=\"intel\"><br>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<br></section><br><hr><br><section id=\"intel\"><br><h2><a href=\"/intel\">Intel</a></h2><br>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -53,7 +53,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<br></section><br></main><br></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<br></section><br><br></main><br>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

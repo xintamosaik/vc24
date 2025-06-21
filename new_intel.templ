@@ -1,0 +1,14 @@
+package main
+templ newIntel() {
+    <h2>New Intel</h2>
+    <br />
+    <form action="/intel" method="POST">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required />
+        <br />
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea>
+        <br />
+        <input type="submit" value="Create" />
+    </form>
+}

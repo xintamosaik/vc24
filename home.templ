@@ -1,74 +1,58 @@
 package main
 
 templ home() {
-<!DOCTYPE html>
-<html lang="en" style="font-family: monospace; max-width: 60ch; margin: 0 auto; padding: 2ch; min-height: 100vh; ">
+<header>
+	<br />
+	<nav>
+		<a href="#drafts">#drafts</a>
+		<a href="#signals">#signals</a>
+		<a href="#intel">#intel</a>
+	</nav>
+	<br />
+</header>
+<br />
+<main>
+	<br />
+	<h1>Atomic Applications</h1>
+	<br />
+	<hr />
+	<br />
+	<section id="drafts">
+		<br />
+		<h2>
+			<a href="/drafts">Drafts</a>
+		</h2>
+		<br />
+		@drafts()
+		<br />
+	</section>
+	<br />
+	<hr />
+	<br />
+	<section id="signals">
+		<br />
+		<h2>
+			<a href="/signals">Signals</a>
+		</h2>
+		<br />
+		@signals()
+		<br />
+	</section>
+	<br />
+	<hr />
+	<br />
+	<section id="intel">
+		<br>
+		<h2>
+			<a href="/intel">Intel</a>
+		</h2>
+		<br />
+		@intel()
+		<br />
+	</section>
+	<br />
+	<br />
+</main>
+<br />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <meta name="color-scheme" content="light dark">
-    <meta name="description" content="Atomic Application App helps to write custom resumes and cover letters">
-    <style>
-        * {
-            line-height: 200%;
-            margin: 2ch 0;
-        }
-
-        @media (prefers-color-scheme:dark) {
-            a {
-                color: yellow;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <br>
-    <header>
-        <br>
-        <nav>
-            <a href="#drafts">#drafts</a>
-            <a href="#signals">#signals</a>
-            <a href="#intel">#intel</a>
-
-        </nav>
-        <br>
-    </header>
-    <br>
-    <main>
-        <br>
-        <h1>Atomic Applications</h1>
-        <br>
-        <hr>
-        <br>
-        <section id="drafts">
-			<br>
-				@drafts()
-			<br>
-        </section>
-        <br>
-        <hr>
-        <br>
-        <section id="signals">
-            <br>
-            	@signals()
-            <br>
-        </section>
-        <br>
-        <hr>
-        <br>
-        <section id="intel">
-            <br>
-				@intel()
-            <br>
-        </section>
-        <br>
-    </main>
-    <br>
-</body>
-
-</html>
-	
 }

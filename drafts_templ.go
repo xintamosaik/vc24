@@ -29,7 +29,7 @@ func drafts() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h2>Drafts</h2><br><ol><li>/drafts/web_developer<a>/edit</a></li><li>/drafts<a>/new</a></li></ol>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<ol><li>/drafts/web_developer<a>/edit</a></li><li><a href=\"/drafts/new\">/new</a></li></ol>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

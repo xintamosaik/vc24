@@ -1,0 +1,36 @@
+package main
+
+templ html(contents templ.Component) {
+<!DOCTYPE html>
+<html lang="en" style="font-family: monospace; max-width: 60ch; margin: 0 auto; padding: 2ch; min-height: 100vh; ">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<meta name="color-scheme" content="light dark">
+	<meta name="description" content="Atomic Application App helps to write custom resumes and cover letters">
+	<style>
+		* {
+			line-height: 200%;
+			margin: 2ch 0;
+		}
+
+		@media (prefers-color-scheme:dark) {
+			a {
+				color: yellow;
+			}
+		}
+	</style>
+	 <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.5/dist/htmx.min.js"></script>
+</head>
+
+<body>
+	<br />
+    @contents
+    <br />
+</body>
+
+</html>
+
+}

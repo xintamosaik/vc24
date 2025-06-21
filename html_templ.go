@@ -8,7 +8,7 @@ package main
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func intel() templ.Component {
+func html(contents templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,7 +29,15 @@ func intel() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<ol><li>/intel/full_stack_developer_thoughtworks<a>/edit</a></li><li><a href=\"/intel/new\">New Intel</a></li></ol>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" style=\"font-family: monospace; max-width: 60ch; margin: 0 auto; padding: 2ch; min-height: 100vh; \"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Document</title><meta name=\"color-scheme\" content=\"light dark\"><meta name=\"description\" content=\"Atomic Application App helps to write custom resumes and cover letters\"><style>\r\n\t\t* {\r\n\t\t\tline-height: 200%;\r\n\t\t\tmargin: 2ch 0;\r\n\t\t}\r\n\r\n\t\t@media (prefers-color-scheme:dark) {\r\n\t\t\ta {\r\n\t\t\t\tcolor: yellow;\r\n\t\t\t}\r\n\t\t}\r\n\t</style><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.5/dist/htmx.min.js\"></script></head><body><br>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = contents.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<br></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
