@@ -1,0 +1,23 @@
+package pages
+templ IntelNew() {
+    <h2>New Intel</h2>
+    <br />
+    <form action="/intel/new" method="POST">
+        <label for="title">Title:</label>
+        <br />
+        <input type="text" id="title" name="title" required minlength="3" maxlength="64" size="53" pattern="^[a-zA-Z0-9.-_\s]+$" title="Title must be alphanumeric and can include spaces." />
+        <br />
+        <br />
+        <label for="description">Description:</label>
+        <br />
+        <textarea id="description" name="description" cols="53" rows="6"></textarea>
+        <br />
+        <br />
+        <label for="content">Content:</label>
+        <br />
+        <textarea id="content" name="content" cols="53" rows="24" required></textarea>
+        <br />
+        <br />
+        <input type="submit" value="Create" />
+    </form>
+}
