@@ -26,19 +26,14 @@ func ssg(component templ.Component, filename string) {
 
 }
 func main() {
-	// Build the pages
+	
 
-	// ssg index
 	ssg(withNavigation(pages.Home()), "index.html")
-	// ssg intel
 	ssg(withNavigation(pages.Intel()), "intel.html")
-	// ssg signals
 	ssg(withNavigation(pages.Signals()), "signals.html")
-	// ssg drafts
 	ssg(withNavigation(pages.Drafts()), "drafts.html")
 	
-	
-	// Generate static files (SSG)
+
 
 	// Serve static files (SSG)
 	http.Handle("/", http.FileServer(http.Dir(static_folder)))
