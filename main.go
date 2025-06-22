@@ -35,7 +35,7 @@ func main() {
 
 	// Serve dynamic pages
 
-	http.Handle("/intel", templ.Handler(html(withNavigation(pages.Intel()))))
+	http.HandleFunc("/intel", showIntelList)
 	
 	http.HandleFunc("/intel/new", handleIntelAdd)
 

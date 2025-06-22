@@ -3,18 +3,88 @@ package main
 import (
 	"context"
 	"encoding/json"
+	
 	"log"
 	"net/http"
 	"os"
-	"time"		
+	"strings"
+	"time"
 
-		"github.com/xintamosaik/vc24/pages"
+	"github.com/xintamosaik/vc24/pages"
 )
+
 type IntelMeta struct {
-	Description string    `json:"description"`
-	Locked      bool      `json:"locked"`
-	CreatedAt   int64     `json:"created_at"`
-	UpdatedAt   int64     `json:"updated_at"`
+	Description string `json:"description"`
+	Locked      bool   `json:"locked"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func listIntelFiles() ([]string, error) {
+	intelPath := "data/intel/"
+	files, err := os.ReadDir(intelPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var intelFiles []string
+	for _, file := range files {
+		if file.IsDir() {
+			continue // Skip directories
+		}
+	
+		filename := file.Name()
+		dotIndex := strings.LastIndex(filename, ".")
+		extension := ""
+		if dotIndex == -1 {
+			extension = ""
+		} else {
+			extension = filename[dotIndex+1:]
+		}
+
+		name := filename[:dotIndex]
+
+		if extension == "json" {
+			// Skip metadata files
+
+			// But check if the corresponding intel file exists
+			intelFile := intelPath + name + ".txt"
+			if _, err := os.Stat(intelFile); os.IsNotExist(err) {
+				log.Printf("Skipping metadata file %s because corresponding intel file does not exist", file.Name())
+				continue // Skip this metadata file if the corresponding intel file does not exist
+			}
+			// If the intel file does not exist, skip this metadata file
+
+		}
+
+		if extension != "txt" && extension != "json" {
+			log.Printf("Skipping file %s with unsupported extension %s", file.Name(), extension)
+			continue // Skip files that are not .txt or .json
+		}
+
+		if extension == "txt" {
+			// Check if the corresponding metadata file exists
+			metaFile := intelPath + name + ".json"
+			if _, err := os.Stat(metaFile); os.IsNotExist(err) {
+				log.Printf("Skipping intel file %s because corresponding metadata file does not exist", file.Name())
+				continue // Skip this intel file if the corresponding metadata file does not exist
+			}
+			intelFiles = append(intelFiles, file.Name())
+		}
+
+	}
+	return intelFiles, nil
+}
+
+func showIntelList(w http.ResponseWriter, r *http.Request) {
+	intelFiles, err := listIntelFiles()
+	if err != nil {
+		http.Error(w, "Failed to list intel files", http.StatusInternalServerError)
+		return
+	}
+
+	// Render the intel list page with the list of files
+	html(withNavigation(pages.Intel(intelFiles))).Render(context.Background(), w)
 }
 
 func handleIntelAdd(w http.ResponseWriter, r *http.Request) {

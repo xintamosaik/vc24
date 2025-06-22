@@ -1,10 +1,12 @@
 package pages
 
-templ Intel() {
+templ Intel(items []string) {
 <ol>
+   for _, item := range items {
     <li>
-        /intel/full_stack_developer_thoughtworks<a>/edit</a>
+        <a href={"/intel/" +item}>{item}</a>
     </li>
+    }
     <li>
         <a href="/intel/new">New Intel</a>
     </li>
