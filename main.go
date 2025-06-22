@@ -29,11 +29,11 @@ func main() {
 	
 
 	ssg(withNavigation(pages.Home()), "index.html")
-	ssg(withNavigation(pages.Intel()), "intel.html")
-	ssg(withNavigation(pages.Signals()), "signals.html")
-	ssg(withNavigation(pages.Drafts()), "drafts.html")
-	
 
+	// Serve dynamic pages
+	http.Handle("/signals", templ.Handler(html(withNavigation(pages.Signals()))))
+	http.Handle("/intel", templ.Handler(html(withNavigation(pages.Intel()))))
+	http.Handle("/drafts", templ.Handler(html(withNavigation(pages.Drafts()))))
 
 	// Serve static files (SSG)
 	http.Handle("/", http.FileServer(http.Dir(static_folder)))
