@@ -1,0 +1,14 @@
+* {
+    line-height: 200%;
+    margin: 2ch 0;
+}
+
+@media (prefers-color-scheme:dark) {
+    a {
+        color: yellow;
+    }
+}
+
+@view-transition {
+    navigation: auto;
+}

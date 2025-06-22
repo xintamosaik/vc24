@@ -29,7 +29,7 @@ func html(contents templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" style=\"font-family: monospace; max-width: 60ch; margin: 0 auto; padding: 2ch; min-height: 100vh; \"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Document</title><meta name=\"color-scheme\" content=\"light dark\"><meta name=\"description\" content=\"Atomic Application App helps to write custom resumes and cover letters\"><style>\r\n\t\t* {\r\n\t\t\tline-height: 200%;\r\n\t\t\tmargin: 2ch 0;\r\n\t\t}\r\n\r\n\t\t@media (prefers-color-scheme:dark) {\r\n\t\t\ta {\r\n\t\t\t\tcolor: yellow;\r\n\t\t\t}\r\n\t\t}\r\n\t</style><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.5/dist/htmx.min.js\"></script></head><body><br>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" style=\"font-family: monospace; max-width: 60ch; margin: 0 auto; padding: 2ch; min-height: 100vh; \"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Document</title><meta name=\"color-scheme\" content=\"light dark\"><meta name=\"description\" content=\"Atomic Application App helps to write custom resumes and cover letters\"><style>\n\t\t\n\t\t\t</style><script src=\"./htmx.min.js\"></script><link rel=\"stylesheet\" href=\"./styles.css\"></head><body><br>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
