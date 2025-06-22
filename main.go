@@ -2,16 +2,23 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"os"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/xintamosaik/vc24/pages"
-
 )
+
+type IntelMeta struct {
+	Description string    `json:"description"`
+	Locked      bool      `json:"locked"`
+	CreatedAt   int64     `json:"created_at"`
+	UpdatedAt   int64     `json:"updated_at"`
+}
 
 const static_folder = "static"
 
@@ -64,7 +71,7 @@ func sanitizeFilename(input string) string {
 	for i := 0; i < len(result)-1; i++ {
 		if result[i] == '_' && result[i+1] == '_' {
 			result = result[:i+1] + result[i+2:]
-			i-- 
+			i--
 		}
 	}
 	// Trim leading and trailing underscores
@@ -77,8 +84,8 @@ func sanitizeFilename(input string) string {
 	// If the result is empty, return a default value
 	if result == "" {
 		timestamp := fmt.Sprintf("%d", time.Now().Unix())
-		return "default_"+ timestamp
-		
+		return "default_" + timestamp
+
 	}
 	return result
 }
@@ -92,10 +99,57 @@ func handleIntelAdd(w http.ResponseWriter, r *http.Request) {
 
 		// Process the form data here
 		title := r.FormValue("title")
-		filename := sanitizeFilename(title) + ".txt"
+		sanitized := sanitizeFilename(title)
+		filename := sanitized + ".txt"
+
+		content := r.FormValue("content")
+		intelPath := "data/intel/"
+		// Ensure the directory exists
+		if err := os.MkdirAll(intelPath, 0755); err != nil {
+			http.Error(w, "Failed to create directory", http.StatusInternalServerError)
+			return
+		}
+
+		// Create or open the file
+		file, err := os.Create(intelPath + filename)
+		if err != nil {
+			http.Error(w, "Failed to create file", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+		// Write the content to the file
+		if _, err := file.WriteString(content); err != nil {
+			http.Error(w, "Failed to write to file", http.StatusInternalServerError)
+			return
+		}
+
+		metafile := sanitized + ".json"
+		// Create or open the metadata file
+		metaFile, err := os.Create(intelPath + metafile)
+		if err != nil {
+			http.Error(w, "Failed to create metadata file", http.StatusInternalServerError)
+			return
+		}
+		defer metaFile.Close()
 
 		description := r.FormValue("description")
-		content := r.FormValue("content")
+		// Write metadata to the metadata file
+		meta := IntelMeta{
+			Description: description,
+			Locked:      false,
+			CreatedAt:   time.Now().Unix(),
+			UpdatedAt:   time.Now().Unix(),
+		}
+		metaData, err := json.Marshal(meta)
+		if err != nil {
+			http.Error(w, "Failed to marshal metadata", http.StatusInternalServerError)
+			return
+		}
+		// Write the metadata to the metadata file
+		if _, err := metaFile.Write(metaData); err != nil {
+			http.Error(w, "Failed to write metadata to file", http.StatusInternalServerError)
+			return
+		}
 
 		// Log the received data (or handle it as needed)
 		log.Printf("Received Intel: Title=%s, Description=%s, Content=%s", title, description, content)
@@ -111,14 +165,14 @@ func main() {
 	ssg(withNavigation(pages.Home()), "index.html")
 
 	// Serve dynamic pages
-	
+
 	http.Handle("/intel", templ.Handler(html(withNavigation(pages.Intel()))))
 	//http.Handle("/intel/new", templ.Handler(html(withNavigation(newIntel()))))
 	http.HandleFunc("/intel/new", handleIntelAdd)
-	
+
 	http.Handle("/drafts", templ.Handler(html(withNavigation(pages.Drafts()))))
 	http.Handle("/signals", templ.Handler(html(withNavigation(pages.Signals()))))
-	
+
 	// Serve static files (SSG)
 	http.Handle("/", http.FileServer(http.Dir(static_folder)))
 
