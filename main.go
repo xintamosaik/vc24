@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"github.com/a-h/templ"
+	"github.com/xintamosaik/vc24/pages"
 	
 )
 
@@ -28,13 +29,13 @@ func main() {
 	// Build the pages
 
 	// ssg index
-	ssg(withNavigation(home()), "index.html")
+	ssg(withNavigation(pages.Home()), "index.html")
 	// ssg intel
-	ssg(withNavigation(intel()), "intel.html")
+	ssg(withNavigation(pages.Intel()), "intel.html")
 	// ssg signals
-	ssg(withNavigation(signals()), "signals.html")
+	ssg(withNavigation(pages.Signals()), "signals.html")
 	// ssg drafts
-	ssg(withNavigation(drafts()), "drafts.html")
+	ssg(withNavigation(pages.Drafts()), "drafts.html")
 	
 	
 	// Generate static files (SSG)
