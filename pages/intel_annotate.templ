@@ -1,35 +1,33 @@
 package pages
 
 templ IntelAnnotate(content []string, filename string) {
-    <h2>Annotate Intel</h2>
-    <br />
-    <div id="intel">
-    for _, line := range content {
-    <p>{ line }</p>
-    }
-    </div>
-    <div id="annotate" popover>
-        
-        
-        <form action="/annotate" method="post">
-        <input type="hidden" name="filename" value={filename}/>
-            <label for="selected_text">Selected Text:</label>
-            <br />
-            <textarea name="selected_text" id="selected_text" rows="6" cols="53" readonly required>
-            </textarea>
-            <br />
-            <label for="annotation">Keyword</label>
-            <br />
-            <input type="text" name="annotation" id="annotation" required/>
-            <br />
-
-            <button type="submit">Submit Annotation</button>
-        </form>
-
-        <button popovertarget="annotate" popovertargetaction="close">Close</button>
-    </div>
-
-    <script>
+	<h2>Annotate Intel</h2>
+	<br/>
+	<div id="intel">
+		for _, line := range content {
+			<p>{ line }</p>
+		}
+	</div>
+	<div id="annotate" popover style="padding: 2ch;">
+		<form action="/annotate" method="post">
+			<input type="hidden" name="filename" value={ filename }/>
+			<label for="selected_text">Selected Text:</label>
+			<br/>
+			<textarea name="selected_text" id="selected_text" rows="6" cols="53" readonly required></textarea>
+			<br/>
+			<label for="annotation">Keyword*</label>
+			<br/>
+			<input type="text" name="annotation" id="annotation" required/>
+			<br/>
+			<label for="description">Description</label>
+			<br/>
+			<textarea name="description" id="description" rows="6" cols="53"></textarea>
+			<br/>
+			<button type="submit">Submit Annotation</button>
+		</form>
+		<button popovertarget="annotate" popovertargetaction="close">Close</button>
+	</div>
+	<script>
         console.log(window.intel);
         window.intel.onmouseup = function() {
             const selection = window.getSelection();
@@ -52,5 +50,4 @@ templ IntelAnnotate(content []string, filename string) {
             
         };
     </script>
-  
 }

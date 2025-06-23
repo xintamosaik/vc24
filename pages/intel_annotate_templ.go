@@ -52,7 +52,7 @@ func IntelAnnotate(content []string, filename string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"annotate\" popover><form action=\"/annotate\" method=\"post\"><input type=\"hidden\" name=\"filename\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"annotate\" popover style=\"padding: 2ch;\"><form action=\"/annotate\" method=\"post\"><input type=\"hidden\" name=\"filename\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -65,7 +65,7 @@ func IntelAnnotate(content []string, filename string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <label for=\"selected_text\">Selected Text:</label><br><textarea name=\"selected_text\" id=\"selected_text\" rows=\"6\" cols=\"53\" readonly required></textarea><br><label for=\"annotation\">Keyword</label><br><input type=\"text\" name=\"annotation\" id=\"annotation\" required><br><button type=\"submit\">Submit Annotation</button></form><button popovertarget=\"annotate\" popovertargetaction=\"close\">Close</button></div><script>\n        console.log(window.intel);\n        window.intel.onmouseup = function() {\n            const selection = window.getSelection();\n            if (!selection.rangeCount) {\n                return;\n            }\n            const range = selection.getRangeAt(0);\n            const selectedText = range.toString();\n            if (selectedText.length > 0) {\n                console.log(\"Selected text: \" + selectedText);\n                // Here you can add code to handle the selected text, e.g., send it to a server or display it in a modal\n            }\n\n            \n            \n            window.selected_text.value = selectedText;\n            \n            window.annotate.showPopover();\n\n            \n        };\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <label for=\"selected_text\">Selected Text:</label><br><textarea name=\"selected_text\" id=\"selected_text\" rows=\"6\" cols=\"53\" readonly required></textarea><br><label for=\"annotation\">Keyword*</label><br><input type=\"text\" name=\"annotation\" id=\"annotation\" required><br><label for=\"description\">Description</label><br><textarea name=\"description\" id=\"description\" rows=\"6\" cols=\"53\"></textarea><br><button type=\"submit\">Submit Annotation</button></form><button popovertarget=\"annotate\" popovertargetaction=\"close\">Close</button></div><script>\n        console.log(window.intel);\n        window.intel.onmouseup = function() {\n            const selection = window.getSelection();\n            if (!selection.rangeCount) {\n                return;\n            }\n            const range = selection.getRangeAt(0);\n            const selectedText = range.toString();\n            if (selectedText.length > 0) {\n                console.log(\"Selected text: \" + selectedText);\n                // Here you can add code to handle the selected text, e.g., send it to a server or display it in a modal\n            }\n\n            \n            \n            window.selected_text.value = selectedText;\n            \n            window.annotate.showPopover();\n\n            \n        };\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
