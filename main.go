@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"strings"
-
+	"encoding/json"
+	"time"
 	"fmt"
+	"strconv"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +14,18 @@ import (
 	"github.com/a-h/templ"
 	"github.com/xintamosaik/vc24/pages"
 )
+
+type AnnotationMeta struct {
+	Keyword    string `json:"keyword"`
+	Description string `json:"description"`
+	LinkedFile string `json:"linked_file"` // This is the filename of the intel file that this annotation is linked to
+	FileStart int `json:"file_start"` // This is the position in the file where the annotation starts
+	FileEnd   int `json:"file_end"`   // This is the position in the file
+	Annotation string `json:"annotation"` // This is the actual annotation text
+
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
 
 const static_folder = "static"
 
@@ -182,8 +196,8 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	log.Println("Keyword for annotation:", keyword)
 
 	// we persist the annotation. We will allow multiple annotations and even keywords. So we use a unix timestamp as the filename. There will never me more than one of them. 
-	timestamp := fmt.Sprintf("%d", r.Context().Value("timestamp").(int64))
-	annotationFile := "data/annotations/" + timestamp + ".json"
+	timestamp := time.Now().Unix()
+	annotationFile := "data/annotations/" + strconv.FormatInt(timestamp, 10) + ".json"
 	// create the directory if it doesn't exist
 	if err := os.MkdirAll("data/annotations", 0755); err != nil {
 		http.Error(w, "Failed to create annotations directory", http.StatusInternalServerError)
@@ -197,6 +211,25 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	// write the annotation to the file
+	meta := AnnotationMeta{
+		Keyword: 	keyword,
+		Description: r.FormValue("description"),
+		LinkedFile:  filename, // This is the filename of the intel file that this annotation
+		FileStart:  window_start, // This is the position in the file where the annotation starts
+		FileEnd:    window_end,   // This is the position in the file where the annotation ends
+		Annotation: annotation, // This is the actual annotation text
+		CreatedAt:   time.Now().Unix(),
+		UpdatedAt:   time.Now().Unix(),
+	}
+	metaData, err := json.Marshal(meta)
+	if err != nil {
+		http.Error(w, "Failed to marshal annotation metadata", http.StatusInternalServerError)
+		return
+	}
+	if _, err := file.Write(metaData); err != nil {
+		http.Error(w, "Failed to write annotation metadata to file", http.StatusInternalServerError)
+		return
+	}
 
 	html(withNavigation(pages.AnnotationSubmitted(filename))).Render(context.Background(), w)
 }
