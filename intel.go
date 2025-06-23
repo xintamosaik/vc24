@@ -109,10 +109,15 @@ func handleIntelAnnotate (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	content := string(file)	
-	log.Println("Content of intel file:", content)
+	
+	splitted := strings.Split(content, "\n")
+	for i, line := range splitted {
+		splitted[i] = strings.TrimSpace(line) 
+	}
+
 
 	// Render the annotation page for the specified intel file
-	html(withNavigation(pages.IntelAnnotate(content))).Render(context.Background(), w)
+	html(withNavigation(pages.IntelAnnotate(splitted, id))).Render(context.Background(), w)
 }
 
 

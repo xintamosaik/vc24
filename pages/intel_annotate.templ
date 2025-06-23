@@ -1,9 +1,56 @@
 package pages
 
-templ IntelAnnotate(content string) {
+templ IntelAnnotate(content []string, filename string) {
     <h2>Annotate Intel</h2>
     <br />
-    <p>
-    { content }
-    </p>
+    <div id="intel">
+    for _, line := range content {
+    <p>{ line }</p>
+    }
+    </div>
+    <div id="annotate" popover>
+        
+        
+        <form action="/annotate" method="post">
+        <input type="hidden" name="filename" value={filename}/>
+            <label for="selected_text">Selected Text:</label>
+            <br />
+            <textarea name="selected_text" id="selected_text" rows="6" cols="53" readonly required>
+            </textarea>
+            <br />
+            <label for="annotation">Keyword</label>
+            <br />
+            <input type="text" name="annotation" id="annotation" required/>
+            <br />
+
+            <button type="submit">Submit Annotation</button>
+        </form>
+
+        <button popovertarget="annotate" popovertargetaction="close">Close</button>
+    </div>
+
+    <script>
+        console.log(window.intel);
+        window.intel.onmouseup = function() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) {
+                return;
+            }
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString();
+            if (selectedText.length > 0) {
+                console.log("Selected text: " + selectedText);
+                // Here you can add code to handle the selected text, e.g., send it to a server or display it in a modal
+            }
+
+            
+            
+            window.selected_text.value = selectedText;
+            
+            window.annotate.showPopover();
+
+            
+        };
+    </script>
+  
 }
