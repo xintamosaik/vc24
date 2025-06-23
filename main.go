@@ -28,6 +28,22 @@ func ssg(component templ.Component, filename string) {
 
 }
 
+func scoreMatch(annotation, window string) int {
+	annotationWords := strings.Fields(annotation)
+	windowWords := strings.Fields(window)
+
+	score := 0
+	for _, aw := range annotationWords {
+		for _, ww := range windowWords {
+			if aw == ww {
+				score++
+				break
+			}
+		}
+	}
+	return score
+}
+
 func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -141,6 +157,30 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	window_end := container_end_in_content_index + last_annotation_in_container_end + len(annotations_fields_last)
 	window := content[window_start:window_end]
 	log.Printf("Search window: %s", window)
+	window_fields := strings.Fields(window)
+	window_fields_glued_back := strings.Join(window_fields, "")
+
+	annotations_fields_glued_back := strings.Join(annotations_fields, "")
+
+	good_enough_match := false
+	if (window_fields_glued_back == annotations_fields_glued_back) {
+		good_enough_match = true
+		log.Println("Good enough match found")
+	}
+
+	matching_score := scoreMatch(annotation, window)
+	log.Printf("Matching score: %d", matching_score)
+	ratio := float64(matching_score) / float64(len(strings.Fields(annotation)))
+	if ratio > 0.95 {
+		good_enough_match = true
+	}
+
+	log.Printf("Matching ratio: %.2f", ratio)
+
+	if !good_enough_match {
+		http.Error(w, "Annotation does not match the content. Please notify the admin. His matching algorithm is dogwater.", http.StatusBadRequest)
+		return
+	}
 
 	log.Printf("Annotation content: %s", annotation)
 	keyword := r.FormValue("annotation")
