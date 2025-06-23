@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/xintamosaik/vc24/pages"
@@ -28,57 +28,56 @@ func ssg(component templ.Component, filename string) {
 
 }
 
-func findWordInArray(word string, array []string) int {
-	for i, w := range array {
-		if w == word {
-			return i // Return the index of the first occurrence
-		}
-	}
-	return -1 // Return -1 if the word is not found
-}
-
-// the function takes two arrays of strings that has words and compares them.
-// It tries to find the first occurence of the first word and then compares all the consecutive words
-// If the next word is not a match it tries again until it can't find the first word in the second array
-func compareWords(first, second []string) bool {
-    if len(first) == 0 || len(second) == 0 {
-        return false // Handle empty inputs gracefully
-    }
-
-    firstWord := first[0]
-	firstIndex := findWordInArray(firstWord, second)
-	if firstIndex == -1 {
-		return false // First word not found in the second array
-	}
-
-	for i := 1; i < len(first); i++ {
-		if first[i] != second[firstIndex+i] {
-			log.Printf("Mismatch found: %s != %s at index %d", first[i], second[firstIndex+i], firstIndex+i)
-			// If the next word is not a match, try to find the first word again
-			firstIndex = findWordInArray(firstWord, second[firstIndex+1:])
-			if firstIndex == -1 {
-				return false // If we can't find the first word again, return false
-			}
-			firstIndex += 1 // Adjust the index to account for the slice
-		}
-	}
-	return true // All words matched in order
-    
-}
-
 func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// See if we find the file and if there is content in in
-
 	filename := r.FormValue("filename")
 	if filename == "" {
 		http.Error(w, "Missing filename ", http.StatusBadRequest)
 		return
 	}
+
+	startedAt := r.FormValue("started_at") // This is the container the selection started in
+	endedAt := r.FormValue("ended_at")     // This is the container the selection ended in
+
+	if startedAt == "" {
+		http.Error(w, "Missing started_at", http.StatusBadRequest)
+		return
+
+	}
+	if endedAt == "" {
+		http.Error(w, "Missing ended_at", http.StatusBadRequest)
+		return
+
+	}
+
+	annotation := r.FormValue("selected_text") // the selected text might span multiple containers
+
+	if annotation == "" {
+		http.Error(w, "Missing annotation", http.StatusBadRequest)
+		return
+	}
+	if len(annotation) == 0 {
+		http.Error(w, "Annotation is empty", http.StatusBadRequest)
+		return
+	}
+
+	startedAtPosition := r.FormValue("started_at_position") // This is the position in the start container that the slection started
+	if startedAtPosition == "" {
+		http.Error(w, "Missing started_at_position", http.StatusBadRequest)
+		return
+	}
+
+	endedAtPosition := r.FormValue("ended_at_position") // This is the position in the end container that the selection ended
+	if endedAtPosition == "" {
+		http.Error(w, "Missing ended_at_position", http.StatusBadRequest)
+		return
+	}
+
+
 	file, err := os.Open("data/intel/" + filename)
 	if err != nil {
 		http.Error(w, "Failed to read intel file", http.StatusInternalServerError)
@@ -99,78 +98,49 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Received annotation for file: %s", filename)
 	// We try to limit the area to search in
-	startedAt := r.FormValue("started_at") // This is the container the selection started in
-	endedAt := r.FormValue("ended_at")     // This is the container the selection ended in
 
-	if startedAt == "" {
-		http.Error(w, "Missing started_at", http.StatusBadRequest)
-		return
+	// we compute the "search window"
+	// start = containerStart + positionStart
+	// end = containerEnd + positionEnd
 
-	}
-	if endedAt == "" {
-		http.Error(w, "Missing ended_at", http.StatusBadRequest)
-		return
-
-	}
-
-	// startedAtPosition := r.FormValue("started_at_position") // This is the position in the start container that the slection started
-	// endedAtPosition := r.FormValue("ended_at_position") // This is the position in the end container that the selection ended
-
-
-	log.Printf("Started at: %s, Ended at: %s", startedAt, endedAt)
-	hasStart := strings.Contains(content, startedAt)
-	if !hasStart {
-		http.Error(w, "Started at not found in the content", http.StatusBadRequest)
+	container_start_in_content_index := strings.Index(content, startedAt)
+	if container_start_in_content_index == -1 {
+		http.Error(w, "Container start not found in content", http.StatusBadRequest)
 		return
 	}
-	startedPosition := strings.Index(content, startedAt)
-	if startedPosition == -1 {
-		http.Error(w, "Started at not found in the content", http.StatusBadRequest)
-		return
-	}
+	log.Printf("Container start found at index: %d", container_start_in_content_index)
 
-	hasEnd := strings.Contains(content, endedAt)
-	if !hasEnd {
-		http.Error(w, "Ended at not found in the content", http.StatusBadRequest)
+	container_end_in_content_index := strings.Index(content, endedAt)
+	if container_end_in_content_index == -1 {
+		http.Error(w, "Container end not found in content", http.StatusBadRequest)
 		return
 	}
-	endedPosition := strings.Index(content, endedAt) + len(endedAt) // + len(endedAt) to include the end container in the selection
-	if endedPosition == -1 {
-		http.Error(w, "Ended at not found in the content", http.StatusBadRequest)
-		return
-	}
+	log.Printf("Container end found at index: %d", container_end_in_content_index)
 
-	log.Printf("Started position: %d, Ended position: %d", startedPosition, endedPosition)
+	annotations_fields := strings.Fields(annotation)
+	annotations_fields_first := annotations_fields[0]
+	log.Printf("First annotation field: %s", annotations_fields_first)
+	annotations_fields_last := annotations_fields[len(annotations_fields)-1]
+	log.Printf("Last annotation field: %s", annotations_fields_last)
+
+	first_annotation_in_container_start := strings.Index(content[container_start_in_content_index:], annotations_fields_first)
+	if first_annotation_in_container_start == -1 {
+		http.Error(w, "First annotation not found in container start", http.StatusBadRequest)
+		return
+	}
+	log.Printf("First annotation found at index: %d", first_annotation_in_container_start)
+
+	last_annotation_in_container_end := strings.Index(content[container_end_in_content_index:], annotations_fields_last)
+	if last_annotation_in_container_end == -1 {	
+		http.Error(w, "Last annotation not found in container end", http.StatusBadRequest)
+		return
+	}
+	log.Printf("Last annotation found at index: %d", last_annotation_in_container_end)
 	
-	annotation := r.FormValue("selected_text") // the selected text might span multiple containers
-	
-	if annotation == "" {
-		http.Error(w, "Missing annotation", http.StatusBadRequest)
-		return
-	}
-	if len(annotation) == 0 {
-		http.Error(w, "Annotation is empty", http.StatusBadRequest)
-		return
-	}
-
-	annotations_splitted_words := strings.Fields(annotation)
-	if len(annotations_splitted_words) == 0 {
-		http.Error(w, "Annotation is empty", http.StatusBadRequest)
-		return
-	}
-
-
-	file_content_splitted := strings.Fields(content)
-	if len(file_content_splitted) == 0 {
-		http.Error(w, "Intel file is empty", http.StatusBadRequest)
-		return
-	}
-
-	matched := compareWords(annotations_splitted_words, file_content_splitted)
-	if !matched {
-		http.Error(w, "Annotation does not match the content", http.StatusBadRequest)
-		return
-	}
+	window_start := container_start_in_content_index + first_annotation_in_container_start
+	window_end := container_end_in_content_index + last_annotation_in_container_end + len(annotations_fields_last)
+	window := content[window_start:window_end]
+	log.Printf("Search window: %s", window)
 
 	log.Printf("Annotation content: %s", annotation)
 	keyword := r.FormValue("annotation")
