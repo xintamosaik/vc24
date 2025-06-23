@@ -113,11 +113,6 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("Received annotation for file: %s", filename)
-	// We try to limit the area to search in
-
-	// we compute the "search window"
-	// start = containerStart + positionStart
-	// end = containerEnd + positionEnd
 
 	container_start_in_content_index := strings.Index(content, startedAt)
 	if container_start_in_content_index == -1 {
@@ -185,6 +180,23 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Annotation content: %s", annotation)
 	keyword := r.FormValue("annotation")
 	log.Println("Keyword for annotation:", keyword)
+
+	// we persist the annotation. We will allow multiple annotations and even keywords. So we use a unix timestamp as the filename. There will never me more than one of them. 
+	timestamp := fmt.Sprintf("%d", r.Context().Value("timestamp").(int64))
+	annotationFile := "data/annotations/" + timestamp + ".json"
+	// create the directory if it doesn't exist
+	if err := os.MkdirAll("data/annotations", 0755); err != nil {
+		http.Error(w, "Failed to create annotations directory", http.StatusInternalServerError)
+		return
+	}
+	// create the file
+	file, err = os.Create(annotationFile)
+	if err != nil {
+		http.Error(w, "Failed to create annotation file", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+	// write the annotation to the file
 
 	html(withNavigation(pages.AnnotationSubmitted(filename))).Render(context.Background(), w)
 }
