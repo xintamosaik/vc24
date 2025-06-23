@@ -86,6 +86,35 @@ func showIntelList(w http.ResponseWriter, r *http.Request) {
 	// Render the intel list page with the list of files
 	html(withNavigation(pages.Intel(intelFiles))).Render(context.Background(), w)
 }
+func handleIntelAnnotate (w http.ResponseWriter, r *http.Request) {
+	// Extract the ID from the URL path
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "Intel ID is required", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the file exists
+	intelPath := "data/intel/" + id 
+	if _, err := os.Stat(intelPath); os.IsNotExist(err) {
+		http.Error(w, "Intel file not found", http.StatusNotFound)
+		return
+	}
+
+
+	// Read the content of the intel file
+	file, err := os.ReadFile(intelPath)
+	if err != nil {
+		http.Error(w, "Failed to read intel file", http.StatusInternalServerError)
+		return
+	}
+	content := string(file)	
+	log.Println("Content of intel file:", content)
+
+	// Render the annotation page for the specified intel file
+	html(withNavigation(pages.IntelAnnotate(content))).Render(context.Background(), w)
+}
+
 
 func handleIntelAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {

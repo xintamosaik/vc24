@@ -38,6 +38,7 @@ func main() {
 	http.HandleFunc("/intel", showIntelList)
 	
 	http.HandleFunc("/intel/new", handleIntelAdd)
+	http.HandleFunc("/intel/{id}", handleIntelAnnotate)
 
 	http.Handle("/drafts", templ.Handler(html(withNavigation(pages.Drafts()))))
 	http.Handle("/signals", templ.Handler(html(withNavigation(pages.Signals()))))
