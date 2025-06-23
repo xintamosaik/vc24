@@ -41,7 +41,7 @@ func IntelAnnotate(content []string, filename string) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(line)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 8, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 9, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -59,13 +59,13 @@ func IntelAnnotate(content []string, filename string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(filename)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 13, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 16, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <label for=\"selected_text\">Selected Text:</label><br><textarea name=\"selected_text\" id=\"selected_text\" rows=\"6\" cols=\"53\" readonly required></textarea><br><label for=\"annotation\">Keyword*</label><br><input type=\"text\" name=\"annotation\" id=\"annotation\" required><br><label for=\"description\">Description</label><br><textarea name=\"description\" id=\"description\" rows=\"6\" cols=\"53\"></textarea><br><button type=\"submit\">Submit Annotation</button></form><button popovertarget=\"annotate\" popovertargetaction=\"close\">Close</button></div><script>\n        window.intel.onmouseup = function() {\n            const selection = window.getSelection();\n            if (!selection.rangeCount) {\n                return;\n            }\n            const range = selection.getRangeAt(0);\n            const selectedText = range.toString();\n            if (!selectedText.length) {\n                return;\n            }\n            \n            window.selected_text.value = selectedText;\n            window.annotate.showPopover();\n        };\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input type=\"hidden\" name=\"started_at\" id=\"started_at\"> <input type=\"hidden\" name=\"ended_at\" id=\"ended_at\"> <input type=\"hidden\" name=\"started_at_position\" id=\"started_at_position\"> <input type=\"hidden\" name=\"ended_at_position\" id=\"ended_at_position\"> <label for=\"selected_text\">Selected Text:</label><br><textarea name=\"selected_text\" id=\"selected_text\" rows=\"6\" cols=\"53\" readonly required></textarea><br><label for=\"annotation\">Keyword*</label><br><input type=\"text\" name=\"annotation\" id=\"annotation\" required><br><label for=\"description\">Description</label><br><textarea name=\"description\" id=\"description\" rows=\"6\" cols=\"53\"></textarea><br><button type=\"submit\">Submit Annotation</button></form><button popovertarget=\"annotate\" popovertargetaction=\"close\">Close</button></div><script>\n        window.intel.onmouseup = function() {\n            const selection = window.getSelection();\n            if (!selection.rangeCount) {\n                return;\n            }\n            const range = selection.getRangeAt(0);\n            const selectedText = range.toString();\n            if (!selectedText.length) {\n                return;\n            }\n\n            const startedAt = range.startContainer;\n            const endedAt = range.endContainer;\n\n\n            window.started_at.value = startedAt.textContent.trim();\n            window.ended_at.value = endedAt.textContent.trim();\n            console.log(\"Selection started at:\", startedAt);\n            console.log(\"Selection ended at:\", endedAt);\n            const postionSelectionInContainerStart = range.startOffset;\n            const postionSelectionInContainerEnd = range.endOffset;\n            console.log(\"Selection start position in container:\", postionSelectionInContainerStart);\n            console.log(\"Selection end position in container:\", postionSelectionInContainerEnd);\n            window.started_at_position.value = postionSelectionInContainerStart;\n            window.ended_at_position.value = postionSelectionInContainerEnd;\n            window.selected_text.value = selectedText;\n            window.annotate.showPopover();\n        };\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

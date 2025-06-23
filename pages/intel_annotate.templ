@@ -4,13 +4,21 @@ templ IntelAnnotate(content []string, filename string) {
 	<h2>Annotate Intel</h2>
 	<br/>
 	<div id="intel">
+       
 		for _, line := range content {
 			<p>{ line }</p>
 		}
+      
 	</div>
+
 	<div id="annotate" popover style="padding: 2ch;">
 		<form action="/annotation/add" method="post">
 			<input type="hidden" name="filename" value={ filename }/>
+            <input type="hidden" name="started_at" id="started_at" />
+            <input type="hidden" name="ended_at" id="ended_at" />
+            <input type="hidden" name="started_at_position" id="started_at_position" />
+            <input type="hidden" name="ended_at_position" id="ended_at_position" />
+        
 			<label for="selected_text">Selected Text:</label>
 			<br/>
 			<textarea name="selected_text" id="selected_text" rows="6" cols="53" readonly required></textarea>
@@ -38,7 +46,21 @@ templ IntelAnnotate(content []string, filename string) {
             if (!selectedText.length) {
                 return;
             }
-            
+
+            const startedAt = range.startContainer;
+            const endedAt = range.endContainer;
+
+
+            window.started_at.value = startedAt.textContent.trim();
+            window.ended_at.value = endedAt.textContent.trim();
+            console.log("Selection started at:", startedAt);
+            console.log("Selection ended at:", endedAt);
+            const postionSelectionInContainerStart = range.startOffset;
+            const postionSelectionInContainerEnd = range.endOffset;
+            console.log("Selection start position in container:", postionSelectionInContainerStart);
+            console.log("Selection end position in container:", postionSelectionInContainerEnd);
+            window.started_at_position.value = postionSelectionInContainerStart;
+            window.ended_at_position.value = postionSelectionInContainerEnd;
             window.selected_text.value = selectedText;
             window.annotate.showPopover();
         };
