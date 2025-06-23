@@ -9,7 +9,7 @@ templ IntelAnnotate(content []string, filename string) {
 		}
 	</div>
 	<div id="annotate" popover style="padding: 2ch;">
-		<form action="/annotate" method="post">
+		<form action="/annotation/add" method="post">
 			<input type="hidden" name="filename" value={ filename }/>
 			<label for="selected_text">Selected Text:</label>
 			<br/>

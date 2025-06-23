@@ -28,6 +28,27 @@ func ssg(component templ.Component, filename string) {
 	}
 
 }
+func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	filename := r.FormValue("filename")
+	annotation := r.FormValue("annotation")
+
+	if filename == "" || annotation == "" {
+		http.Error(w, "Missing filename or annotation", http.StatusBadRequest)
+		return
+	}
+
+	
+	html(withNavigation(pages.AnnotationSubmitted(filename))).Render(context.Background(), w)
+}
+	
+
+	
+
 
 func main() {
 
@@ -39,6 +60,7 @@ func main() {
 	
 	http.HandleFunc("/intel/new", handleIntelAdd)
 	http.HandleFunc("/intel/{id}", handleIntelAnnotate)
+	http.HandleFunc("/annotation/add", handleAnnotationAdd)
 
 	http.Handle("/drafts", templ.Handler(html(withNavigation(pages.Drafts()))))
 	http.Handle("/signals", templ.Handler(html(withNavigation(pages.Signals()))))
