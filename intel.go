@@ -115,9 +115,51 @@ func handleIntelAnnotate(w http.ResponseWriter, r *http.Request) {
 	for i, line := range splitted {
 		splitted[i] = strings.TrimSpace(line)
 	}
+	allAnnotations,err := getAllAnnotations()
+	if err != nil {
+		http.Error(w, "Failed to read annotations", http.StatusInternalServerError)
+		return
+	}
+	filteredAnnotations := filterAnnotationsByFile(allAnnotations, id)
+	/*
+incoming data structure:
+type AnnotationMeta struct {
+	Keyword     string `json:"keyword"`
+	Description string `json:"description"`
+	LinkedFile  string `json:"linked_file"` // This is the filename of the intel file that this annotation is linked to
+	FileStart   int    `json:"file_start"`  // This is the position in the file where the annotation starts
+	FileEnd     int    `json:"file_end"`    // This is the position in the file
+	Annotation  string `json:"annotation"`  // This is the actual annotation text
+
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
+}
+
+required data structure for the page:
+type Annotation struct {
+    keyword string 
+    description string
+    start int
+    end int 
+    content string
+}
+	*/
+	// We have to map from incoming to required data structure and rely on duck typing
+	var annotations []pages.Annotation
+	for _, ann := range filteredAnnotations {
+		// Create a new Annotation struct for each AnnotationMeta
+		annotations = append(annotations, pages.Annotation{
+			Keyword:     ann.Keyword,
+			Description: ann.Description,
+			Start:       ann.FileStart,
+			End:         ann.FileEnd,
+			Content:     ann.Annotation,
+		})
+	}
+
 
 	// Render the annotation page for the specified intel file
-	html(withNavigation(pages.IntelAnnotate(splitted, id))).Render(context.Background(), w)
+	html(withNavigation(pages.IntelAnnotate(splitted, id, annotations))).Render(context.Background(), w)
 }
 
 func createIntelMeta(description string, filename string) error {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/xintamosaik/vc24/pages"
 )
+const annotationsPath = "data/annotations/"
 type AnnotationMeta struct {
 	Keyword     string `json:"keyword"`
 	Description string `json:"description"`
@@ -178,9 +179,9 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 
 	// we persist the annotation. We will allow multiple annotations and even keywords. So we use a unix timestamp as the filename. There will never me more than one of them.
 	timestamp := time.Now().Unix()
-	annotationFile := "data/annotations/" + strconv.FormatInt(timestamp, 10) + ".json"
+	annotationFile := annotationsPath + strconv.FormatInt(timestamp, 10) + ".json"
 	// create the directory if it doesn't exist
-	if err := os.MkdirAll("data/annotations", 0755); err != nil {
+	if err := os.MkdirAll(annotationsPath, 0755); err != nil {
 		http.Error(w, "Failed to create annotations directory", http.StatusInternalServerError)
 		return
 	}
@@ -202,7 +203,7 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   time.Now().Unix(),
 		UpdatedAt:   time.Now().Unix(),
 	}
-	
+
 	metaData, err := json.Marshal(meta)
 	if err != nil {
 		http.Error(w, "Failed to marshal annotation metadata", http.StatusInternalServerError)
@@ -221,4 +222,64 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	html(withNavigation(pages.AnnotationSubmitted(filename))).Render(context.Background(), w)
+}
+
+// Just read the folder with annotations and return a list of them
+func getAnnotationList() ([]string, error) {
+	files, err := os.ReadDir(annotationsPath)
+	if err != nil {
+		log.Println("Failed to read annotations directory:", err)
+		return nil, err
+	}
+
+
+	filenames := make([]string, 0, len(files))
+	for _, file := range files {
+		if file.IsDir() {
+			continue // Skip directories
+		}
+		filename := file.Name()
+		
+		if strings.HasSuffix(filename, ".json") {
+			filenames = append(filenames, filename)
+			log.Println(" -", filename)
+		}
+	}
+
+	return filenames, nil
+}
+
+func getAllAnnotations() ([]AnnotationMeta, error) {
+	files, err := getAnnotationList()
+	if err != nil {
+		return nil, err
+	}
+
+	var annotations []AnnotationMeta
+	for _, file := range files {
+		data, err := os.ReadFile(annotationsPath + file)
+		if err != nil {
+			log.Printf("Failed to read annotation file %s: %v", file, err)
+			continue
+		}
+
+		var meta AnnotationMeta
+		if err := json.Unmarshal(data, &meta); err != nil {
+			log.Printf("Failed to unmarshal annotation metadata from %s: %v", file, err)
+			continue
+		}
+		annotations = append(annotations, meta)
+	}
+
+	return annotations, nil
+}
+
+func filterAnnotationsByFile(annotations []AnnotationMeta, filename string) []AnnotationMeta {
+	var filtered []AnnotationMeta
+	for _, annotation := range annotations {
+		if annotation.LinkedFile == filename {
+			filtered = append(filtered, annotation)
+		}
+	}
+	return filtered
 }

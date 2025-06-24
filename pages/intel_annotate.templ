@@ -1,8 +1,28 @@
 package pages
 
-templ IntelAnnotate(content []string, filename string) {
+
+type Annotation struct {
+    Keyword string 
+    Description string
+    Start int
+    End int 
+    Content string
+}
+
+templ IntelAnnotate(content []string, filename string, annotations []Annotation) {
 	<h2>Annotate Intel</h2>
 	<br/>
+    <div id="annotations">
+        for _, annotation := range annotations {
+            <div class="annotation">
+                <strong>Keyword:</strong> { annotation.Keyword }<br/>
+                <strong>Description:</strong> { annotation.Description }<br/>
+                <strong>Content:</strong> { annotation.Content }<br/>
+                <strong>Start Position:</strong> { annotation.Start }<br/>
+                <strong>End Position:</strong> { annotation.End }<br/>
+            </div>
+        }
+    </div>
 	<div id="intel">
        
 		for _, line := range content {
@@ -10,6 +30,7 @@ templ IntelAnnotate(content []string, filename string) {
 		}
       
 	</div>
+    
 
 	<div id="annotate" popover style="padding: 2ch;">
 		<form action="/annotation/add" method="post">
