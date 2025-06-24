@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 
 	"log"
 	"net/http"
@@ -151,8 +152,8 @@ type Annotation struct {
 		annotations = append(annotations, pages.Annotation{
 			Keyword:     ann.Keyword,
 			Description: ann.Description,
-			Start:       ann.FileStart,
-			End:         ann.FileEnd,
+			Start:       strconv.Itoa(ann.FileStart),
+			End:         strconv.Itoa(ann.FileEnd),
 			Content:     ann.Annotation,
 		})
 	}

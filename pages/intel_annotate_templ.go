@@ -11,8 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 type Annotation struct {
 	Keyword     string
 	Description string
-	Start       int
-	End         int
+	Start       string
+	End         string
 	Content     string
 }
 
@@ -37,118 +37,165 @@ func IntelAnnotate(content []string, filename string, annotations []Annotation) 
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h2>Annotate Intel</h2><br><div id=\"annotations\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h2>Annotate Intel</h2><br><div id=\"intel\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, annotation := range annotations {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"annotation\"><strong>Keyword:</strong> ")
+		for _, line := range content {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Keyword)
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(line)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 18, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 18, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<br><strong>Description:</strong> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Description)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 19, Col: 70}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<br><strong>Content:</strong> ")
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"annotate\" popover style=\"padding: 2ch;\"><form action=\"/annotation/add\" method=\"post\"><input type=\"hidden\" name=\"filename\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(filename)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 23, Col: 56}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input type=\"hidden\" name=\"started_at\" id=\"started_at\"> <input type=\"hidden\" name=\"ended_at\" id=\"ended_at\"> <input type=\"hidden\" name=\"started_at_position\" id=\"started_at_position\"> <input type=\"hidden\" name=\"ended_at_position\" id=\"ended_at_position\"> <label for=\"selected_text\">Selected Text:</label><br><textarea name=\"selected_text\" id=\"selected_text\" rows=\"6\" cols=\"53\" readonly required></textarea><br><label for=\"annotation\">Keyword*</label><br><input type=\"text\" name=\"annotation\" id=\"annotation\" required><br><label for=\"description\">Description</label><br><textarea name=\"description\" id=\"description\" rows=\"6\" cols=\"53\"></textarea><br><button type=\"submit\">Submit Annotation</button></form><button popovertarget=\"annotate\" popovertargetaction=\"close\">Close</button></div><script>\n        window.intel.onmouseup = function() {\n            const selection = window.getSelection();\n            if (!selection.rangeCount) {\n                return;\n            }\n            const range = selection.getRangeAt(0);\n            const selectedText = range.toString();\n            if (!selectedText.length) {\n                return;\n            }\n            window.selected_text.value = selectedText;\n\n            const startedAt = range.startContainer;\n            window.started_at.value = startedAt.textContent.trim();\n            \n            const endedAt = range.endContainer;\n            window.ended_at.value = endedAt.textContent.trim();\n\n            const postionSelectionInContainerStart = range.startOffset;\n            window.started_at_position.value = postionSelectionInContainerStart;\n\n            const postionSelectionInContainerEnd = range.endOffset;\n            window.ended_at_position.value = postionSelectionInContainerEnd;\n         \n            window.annotate.showPopover();\n        };\n    </script><div id=\"keywords\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for key, annotation := range annotations {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<button popovertarget=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Content)
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(1000 + key)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 20, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 74, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<br><strong>Start Position:</strong> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" popovertargetaction=\"toggle\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Start)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Keyword)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 21, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 74, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<br><strong>End Position:</strong> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"></button><div id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.End)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(1000 + key)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 22, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 75, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<br></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div id=\"intel\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, line := range content {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" popover><h3>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(line)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Keyword)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 29, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 76, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</h3><p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Description)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 77, Col: 30}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</p><p><strong>Selected Text:</strong> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Content)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 78, Col: 58}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</p><p><strong>Start Position:</strong> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.Start)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 79, Col: 57}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " | <strong>End Position:</strong> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(annotation.End)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 79, Col: 109}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</p><a href=\"/annotation/delete?filename={ filename }&keyword={ annotation.Keyword }\">Delete</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div id=\"annotate\" popover style=\"padding: 2ch;\"><form action=\"/annotation/add\" method=\"post\"><input type=\"hidden\" name=\"filename\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(filename)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/intel_annotate.templ`, Line: 37, Col: 56}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		templ_7745c5c3_Err = templ.JSONScript("annotationsData", annotations).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"> <input type=\"hidden\" name=\"started_at\" id=\"started_at\"> <input type=\"hidden\" name=\"ended_at\" id=\"ended_at\"> <input type=\"hidden\" name=\"started_at_position\" id=\"started_at_position\"> <input type=\"hidden\" name=\"ended_at_position\" id=\"ended_at_position\"> <label for=\"selected_text\">Selected Text:</label><br><textarea name=\"selected_text\" id=\"selected_text\" rows=\"6\" cols=\"53\" readonly required></textarea><br><label for=\"annotation\">Keyword*</label><br><input type=\"text\" name=\"annotation\" id=\"annotation\" required><br><label for=\"description\">Description</label><br><textarea name=\"description\" id=\"description\" rows=\"6\" cols=\"53\"></textarea><br><button type=\"submit\">Submit Annotation</button></form><button popovertarget=\"annotate\" popovertargetaction=\"close\">Close</button></div><script>\n        window.intel.onmouseup = function() {\n            const selection = window.getSelection();\n            if (!selection.rangeCount) {\n                return;\n            }\n            const range = selection.getRangeAt(0);\n            const selectedText = range.toString();\n            if (!selectedText.length) {\n                return;\n            }\n            window.selected_text.value = selectedText;\n\n            const startedAt = range.startContainer;\n            window.started_at.value = startedAt.textContent.trim();\n            \n            const endedAt = range.endContainer;\n            window.ended_at.value = endedAt.textContent.trim();\n\n            const postionSelectionInContainerStart = range.startOffset;\n            window.started_at_position.value = postionSelectionInContainerStart;\n\n            const postionSelectionInContainerEnd = range.endOffset;\n            window.ended_at_position.value = postionSelectionInContainerEnd;\n         \n            window.annotate.showPopover();\n        };\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<script>\n        const scriptTag = document.getElementById(\"annotationsData\");\n\t\tconst annotationsData = JSON.parse(scriptTag.textContent);\n\t\tconsole.log({ annotationsData });\n\t\t\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

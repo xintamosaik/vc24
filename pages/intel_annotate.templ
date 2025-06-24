@@ -2,44 +2,29 @@ package pages
 
 
 type Annotation struct {
-    Keyword string 
-    Description string
-    Start int
-    End int 
-    Content string
+	Keyword     string
+	Description string
+	Start       string
+	End         string
+	Content     string
 }
 
 templ IntelAnnotate(content []string, filename string, annotations []Annotation) {
 	<h2>Annotate Intel</h2>
 	<br/>
-    <div id="annotations">
-        for _, annotation := range annotations {
-            <div class="annotation">
-                <strong>Keyword:</strong> { annotation.Keyword }<br/>
-                <strong>Description:</strong> { annotation.Description }<br/>
-                <strong>Content:</strong> { annotation.Content }<br/>
-                <strong>Start Position:</strong> { annotation.Start }<br/>
-                <strong>End Position:</strong> { annotation.End }<br/>
-            </div>
-        }
-    </div>
+
 	<div id="intel">
-       
 		for _, line := range content {
 			<p>{ line }</p>
 		}
-      
 	</div>
-    
-
 	<div id="annotate" popover style="padding: 2ch;">
 		<form action="/annotation/add" method="post">
 			<input type="hidden" name="filename" value={ filename }/>
-            <input type="hidden" name="started_at" id="started_at" />
-            <input type="hidden" name="ended_at" id="ended_at" />
-            <input type="hidden" name="started_at_position" id="started_at_position" />
-            <input type="hidden" name="ended_at_position" id="ended_at_position" />
-        
+			<input type="hidden" name="started_at" id="started_at"/>
+			<input type="hidden" name="ended_at" id="ended_at"/>
+			<input type="hidden" name="started_at_position" id="started_at_position"/>
+			<input type="hidden" name="ended_at_position" id="ended_at_position"/>
 			<label for="selected_text">Selected Text:</label>
 			<br/>
 			<textarea name="selected_text" id="selected_text" rows="6" cols="53" readonly required></textarea>
@@ -83,5 +68,26 @@ templ IntelAnnotate(content []string, filename string, annotations []Annotation)
          
             window.annotate.showPopover();
         };
+    </script>
+	<div id="keywords">
+	for key, annotation := range annotations {
+		<button popovertarget={ 1000 + key } popovertargetaction="toggle" value={ annotation.Keyword }></button>
+		<div id={ 1000 + key } popover>
+			<h3>{ annotation.Keyword }</h3>
+			<p>{ annotation.Description }</p>
+			<p><strong>Selected Text:</strong> { annotation.Content }</p>
+			<p><strong>Start Position:</strong> { annotation.Start } | <strong>End Position:</strong> { annotation.End }</p>
+			<a href="/annotation/delete?filename={ filename }&keyword={ annotation.Keyword }">Delete</a>	
+		</div>
+	}
+	
+	</div>
+
+	@templ.JSONScript("annotationsData", annotations)
+	<script>
+        const scriptTag = document.getElementById("annotationsData");
+		const annotationsData = JSON.parse(scriptTag.textContent);
+		console.log({ annotationsData });
+		
     </script>
 }
