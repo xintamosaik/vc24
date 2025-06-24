@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/xintamosaik/vc24/pages"
-	
 )
 
 type IntelMeta struct {
@@ -20,6 +19,7 @@ type IntelMeta struct {
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
+
 const intelPath = "data/intel/"
 
 func listIntelFiles() ([]string, error) {
@@ -34,7 +34,7 @@ func listIntelFiles() ([]string, error) {
 		if file.IsDir() {
 			continue // Skip directories
 		}
-	
+
 		filename := file.Name()
 		dotIndex := strings.LastIndex(filename, ".")
 		extension := ""
@@ -88,7 +88,7 @@ func showIntelList(w http.ResponseWriter, r *http.Request) {
 	// Render the intel list page with the list of files
 	html(withNavigation(pages.Intel(intelFiles))).Render(context.Background(), w)
 }
-func handleIntelAnnotate (w http.ResponseWriter, r *http.Request) {
+func handleIntelAnnotate(w http.ResponseWriter, r *http.Request) {
 	// Extract the ID from the URL path
 	id := r.PathValue("id")
 	if id == "" {
@@ -97,12 +97,11 @@ func handleIntelAnnotate (w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the file exists
-	intelPath := "data/intel/" + id 
+	intelPath := "data/intel/" + id
 	if _, err := os.Stat(intelPath); os.IsNotExist(err) {
 		http.Error(w, "Intel file not found", http.StatusNotFound)
 		return
 	}
-
 
 	// Read the content of the intel file
 	file, err := os.ReadFile(intelPath)
@@ -110,48 +109,47 @@ func handleIntelAnnotate (w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to read intel file", http.StatusInternalServerError)
 		return
 	}
-	content := string(file)	
-	
+	content := string(file)
+
 	splitted := strings.Split(content, "\n")
 	for i, line := range splitted {
-		splitted[i] = strings.TrimSpace(line) 
+		splitted[i] = strings.TrimSpace(line)
 	}
-
 
 	// Render the annotation page for the specified intel file
 	html(withNavigation(pages.IntelAnnotate(splitted, id))).Render(context.Background(), w)
 }
 
 func createIntelMeta(description string, filename string) error {
-		metafile := filename + ".json"
-		// Create or open the metadata file
-		metaFile, err := os.Create(intelPath + metafile)
-		if err != nil {
-			return err
-		}
-		defer metaFile.Close()
-		meta := IntelMeta{
-			Description: description,
-			Locked:      false,
-			CreatedAt:   time.Now().Unix(),
-			UpdatedAt:   time.Now().Unix(),
-		}
-		metaData, err := json.Marshal(meta)
-		if err != nil {
-			return err
-			
-		}
-		// Write the metadata to the metadata file
-		if _, err := metaFile.Write(metaData); err != nil {
-			return err
-		}
+	metafile := filename + ".json"
+	// Create or open the metadata file
+	metaFile, err := os.Create(intelPath + metafile)
+	if err != nil {
+		return err
+	}
+	defer metaFile.Close()
+	meta := IntelMeta{
+		Description: description,
+		Locked:      false,
+		CreatedAt:   time.Now().Unix(),
+		UpdatedAt:   time.Now().Unix(),
+	}
+	metaData, err := json.Marshal(meta)
+	if err != nil {
+		return err
 
-		return nil
+	}
+	// Write the metadata to the metadata file
+	if _, err := metaFile.Write(metaData); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func readIntelMeta(filename string) (*IntelMeta, error) {
-	metafile := filename + ".json"
-	metaData, err := os.ReadFile(intelPath + metafile)
+
+	metaData, err := os.ReadFile(intelPath + filename)
 	if err != nil {
 		return nil, err
 	}
@@ -165,13 +163,13 @@ func readIntelMeta(filename string) (*IntelMeta, error) {
 }
 
 func writeIntelMeta(filename string, meta *IntelMeta) error {
-	metafile := filename + ".json"
+
 	metaData, err := json.Marshal(meta)
 	if err != nil {
 		return err
 	}
 
-	if err := os.WriteFile(intelPath + metafile, metaData, 0644); err != nil {
+	if err := os.WriteFile(intelPath+filename, metaData, 0644); err != nil {
 		return err
 	}
 
@@ -179,16 +177,19 @@ func writeIntelMeta(filename string, meta *IntelMeta) error {
 }
 
 func LockIntel(filename string) error {
-	log.Printf("Locking intel file: %s", filename)
+	
 	meta, err := readIntelMeta(filename)
 	if err != nil {
+		log.Printf("Error reading metadata for %s: %v", filename, err)
 		return err
 	}
 
+	
 	meta.Locked = true
 	meta.UpdatedAt = time.Now().Unix()
 
 	if err := writeIntelMeta(filename, meta); err != nil {
+		log.Printf("Error writing metadata for %s: %v", filename, err)
 		return err
 	}
 
@@ -198,6 +199,7 @@ func LockIntel(filename string) error {
 func UnlockIntel(filename string) error {
 	meta, err := readIntelMeta(filename)
 	if err != nil {
+		log.Printf("Error reading metadata for %s: %v", filename, err)
 		return err
 	}
 
@@ -205,12 +207,12 @@ func UnlockIntel(filename string) error {
 	meta.UpdatedAt = time.Now().Unix()
 
 	if err := writeIntelMeta(filename, meta); err != nil {
+		log.Printf("Error writing metadata for %s: %v", filename, err)
 		return err
 	}
 
 	return nil
 }
-
 
 func handleIntelAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
