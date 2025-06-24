@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	
+
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/xintamosaik/vc24/pages"
+	
 )
 
 type IntelMeta struct {
@@ -19,6 +20,7 @@ type IntelMeta struct {
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 }
+const intelPath = "data/intel/"
 
 func listIntelFiles() ([]string, error) {
 	intelPath := "data/intel/"
@@ -120,6 +122,95 @@ func handleIntelAnnotate (w http.ResponseWriter, r *http.Request) {
 	html(withNavigation(pages.IntelAnnotate(splitted, id))).Render(context.Background(), w)
 }
 
+func createIntelMeta(description string, filename string) error {
+		metafile := filename + ".json"
+		// Create or open the metadata file
+		metaFile, err := os.Create(intelPath + metafile)
+		if err != nil {
+			return err
+		}
+		defer metaFile.Close()
+		meta := IntelMeta{
+			Description: description,
+			Locked:      false,
+			CreatedAt:   time.Now().Unix(),
+			UpdatedAt:   time.Now().Unix(),
+		}
+		metaData, err := json.Marshal(meta)
+		if err != nil {
+			return err
+			
+		}
+		// Write the metadata to the metadata file
+		if _, err := metaFile.Write(metaData); err != nil {
+			return err
+		}
+
+		return nil
+}
+
+func readIntelMeta(filename string) (*IntelMeta, error) {
+	metafile := filename + ".json"
+	metaData, err := os.ReadFile(intelPath + metafile)
+	if err != nil {
+		return nil, err
+	}
+
+	var meta IntelMeta
+	if err := json.Unmarshal(metaData, &meta); err != nil {
+		return nil, err
+	}
+
+	return &meta, nil
+}
+
+func writeIntelMeta(filename string, meta *IntelMeta) error {
+	metafile := filename + ".json"
+	metaData, err := json.Marshal(meta)
+	if err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(intelPath + metafile, metaData, 0644); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func LockIntel(filename string) error {
+	log.Printf("Locking intel file: %s", filename)
+	meta, err := readIntelMeta(filename)
+	if err != nil {
+		return err
+	}
+
+	meta.Locked = true
+	meta.UpdatedAt = time.Now().Unix()
+
+	if err := writeIntelMeta(filename, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UnlockIntel(filename string) error {
+	meta, err := readIntelMeta(filename)
+	if err != nil {
+		return err
+	}
+
+	meta.Locked = false
+	meta.UpdatedAt = time.Now().Unix()
+
+	if err := writeIntelMeta(filename, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 func handleIntelAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -135,7 +226,7 @@ func handleIntelAdd(w http.ResponseWriter, r *http.Request) {
 		filename := sanitized + ".txt"
 
 		content := r.FormValue("content")
-		intelPath := "data/intel/"
+
 		// Ensure the directory exists
 		if err := os.MkdirAll(intelPath, 0755); err != nil {
 			http.Error(w, "Failed to create directory", http.StatusInternalServerError)
@@ -155,36 +246,14 @@ func handleIntelAdd(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		metafile := sanitized + ".json"
-		// Create or open the metadata file
-		metaFile, err := os.Create(intelPath + metafile)
-		if err != nil {
+		// write metadata to file
+		if err := createIntelMeta(r.FormValue("description"), filename); err != nil {
 			http.Error(w, "Failed to create metadata file", http.StatusInternalServerError)
-			return
-		}
-		defer metaFile.Close()
-
-		description := r.FormValue("description")
-		// Write metadata to the metadata file
-		meta := IntelMeta{
-			Description: description,
-			Locked:      false,
-			CreatedAt:   time.Now().Unix(),
-			UpdatedAt:   time.Now().Unix(),
-		}
-		metaData, err := json.Marshal(meta)
-		if err != nil {
-			http.Error(w, "Failed to marshal metadata", http.StatusInternalServerError)
-			return
-		}
-		// Write the metadata to the metadata file
-		if _, err := metaFile.Write(metaData); err != nil {
-			http.Error(w, "Failed to write metadata to file", http.StatusInternalServerError)
 			return
 		}
 
 		// Log the received data (or handle it as needed)
-		log.Printf("Received Intel: Title=%s, Description=%s, Content=%s", title, description, content)
+		log.Printf("Received Intel: Title=%s, Content=%s", title, content)
 		log.Printf("Sanitized Filename: %s", filename)
 		// For example, you can read the form values and save them to a database or file
 		html(withNavigation(pages.IntelSubmitted())).Render(context.Background(), w)

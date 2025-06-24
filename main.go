@@ -232,42 +232,10 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 
 	// geht the filename for the metadata
 	intelMetaFile := strings.TrimSuffix(filename, ".txt") + ".json" // remove the .json extension for the display
-	log.Printf("Annotation metadata file: %s", intelMetaFile)
-
-	intelMetaJSON, err := os.ReadFile("data/intel/" + intelMetaFile)
-	if err != nil {
-		http.Error(w, "Failed to read intel metadata file", http.StatusInternalServerError)
+	if err := LockIntel(intelMetaFile); err != nil {
+		http.Error(w, "Failed to lock intel file", http.StatusInternalServerError)
 		return
 	}
-	
-	type IntelMeta struct {
-		Description string `json:"description"`
-		Locked      bool   `json:"locked"`
-		CreatedAt   int64  `json:"created_at"`
-		UpdatedAt   int64  `json:"updated_at"`
-	}
-
-	intelMeta := IntelMeta{}
-	if err := json.Unmarshal(intelMetaJSON, &intelMeta); err != nil {
-		http.Error(w, "Failed to unmarshal intel metadata", http.StatusInternalServerError)
-		return
-	}
-
-	intelMeta.Locked = true // Lock the intel file after annotation
-	intelMeta.UpdatedAt = time.Now().Unix()
-	intelMetaData, err := json.Marshal(intelMeta)
-	if err != nil {
-		http.Error(w, "Failed to marshal intel metadata", http.StatusInternalServerError)
-		return
-	}
-	if err := os.WriteFile("data/intel/"+intelMetaFile, intelMetaData, 0644); err != nil {
-		http.Error(w, "Failed to write intel metadata file", http.StatusInternalServerError)
-		return
-	}
-
-
-
-
 
 	html(withNavigation(pages.AnnotationSubmitted(filename))).Render(context.Background(), w)
 }
