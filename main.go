@@ -2,29 +2,29 @@ package main
 
 import (
 	"context"
-	"strings"
 	"encoding/json"
-	"time"
 	"fmt"
-	"strconv"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/xintamosaik/vc24/pages"
 )
 
 type AnnotationMeta struct {
-	Keyword    string `json:"keyword"`
+	Keyword     string `json:"keyword"`
 	Description string `json:"description"`
-	LinkedFile string `json:"linked_file"` // This is the filename of the intel file that this annotation is linked to
-	FileStart int `json:"file_start"` // This is the position in the file where the annotation starts
-	FileEnd   int `json:"file_end"`   // This is the position in the file
-	Annotation string `json:"annotation"` // This is the actual annotation text
+	LinkedFile  string `json:"linked_file"` // This is the filename of the intel file that this annotation is linked to
+	FileStart   int    `json:"file_start"`  // This is the position in the file where the annotation starts
+	FileEnd     int    `json:"file_end"`    // This is the position in the file
+	Annotation  string `json:"annotation"`  // This is the actual annotation text
 
-	CreatedAt   int64  `json:"created_at"`
-	UpdatedAt   int64  `json:"updated_at"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 const static_folder = "static"
@@ -107,7 +107,6 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	file, err := os.Open("data/intel/" + filename)
 	if err != nil {
 		http.Error(w, "Failed to read intel file", http.StatusInternalServerError)
@@ -156,12 +155,12 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	log.Printf("First annotation found at index: %d", first_annotation_in_container_start)
 
 	last_annotation_in_container_end := strings.Index(content[container_end_in_content_index:], annotations_fields_last)
-	if last_annotation_in_container_end == -1 {	
+	if last_annotation_in_container_end == -1 {
 		http.Error(w, "Last annotation not found in container end", http.StatusBadRequest)
 		return
 	}
 	log.Printf("Last annotation found at index: %d", last_annotation_in_container_end)
-	
+
 	window_start := container_start_in_content_index + first_annotation_in_container_start
 	window_end := container_end_in_content_index + last_annotation_in_container_end + len(annotations_fields_last)
 	window := content[window_start:window_end]
@@ -172,7 +171,7 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	annotations_fields_glued_back := strings.Join(annotations_fields, "")
 
 	good_enough_match := false
-	if (window_fields_glued_back == annotations_fields_glued_back) {
+	if window_fields_glued_back == annotations_fields_glued_back {
 		good_enough_match = true
 		log.Println("Good enough match found")
 	}
@@ -195,7 +194,7 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	keyword := r.FormValue("annotation")
 	log.Println("Keyword for annotation:", keyword)
 
-	// we persist the annotation. We will allow multiple annotations and even keywords. So we use a unix timestamp as the filename. There will never me more than one of them. 
+	// we persist the annotation. We will allow multiple annotations and even keywords. So we use a unix timestamp as the filename. There will never me more than one of them.
 	timestamp := time.Now().Unix()
 	annotationFile := "data/annotations/" + strconv.FormatInt(timestamp, 10) + ".json"
 	// create the directory if it doesn't exist
@@ -212,12 +211,12 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	// write the annotation to the file
 	meta := AnnotationMeta{
-		Keyword: 	keyword,
+		Keyword:     keyword,
 		Description: r.FormValue("description"),
-		LinkedFile:  filename, // This is the filename of the intel file that this annotation
-		FileStart:  window_start, // This is the position in the file where the annotation starts
-		FileEnd:    window_end,   // This is the position in the file where the annotation ends
-		Annotation: annotation, // This is the actual annotation text
+		LinkedFile:  filename,     // This is the filename of the intel file that this annotation
+		FileStart:   window_start, // This is the position in the file where the annotation starts
+		FileEnd:     window_end,   // This is the position in the file where the annotation ends
+		Annotation:  annotation,   // This is the actual annotation text
 		CreatedAt:   time.Now().Unix(),
 		UpdatedAt:   time.Now().Unix(),
 	}
@@ -230,6 +229,45 @@ func handleAnnotationAdd(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to write annotation metadata to file", http.StatusInternalServerError)
 		return
 	}
+
+	// geht the filename for the metadata
+	intelMetaFile := strings.TrimSuffix(filename, ".txt") + ".json" // remove the .json extension for the display
+	log.Printf("Annotation metadata file: %s", intelMetaFile)
+
+	intelMetaJSON, err := os.ReadFile("data/intel/" + intelMetaFile)
+	if err != nil {
+		http.Error(w, "Failed to read intel metadata file", http.StatusInternalServerError)
+		return
+	}
+	
+	type IntelMeta struct {
+		Description string `json:"description"`
+		Locked      bool   `json:"locked"`
+		CreatedAt   int64  `json:"created_at"`
+		UpdatedAt   int64  `json:"updated_at"`
+	}
+
+	intelMeta := IntelMeta{}
+	if err := json.Unmarshal(intelMetaJSON, &intelMeta); err != nil {
+		http.Error(w, "Failed to unmarshal intel metadata", http.StatusInternalServerError)
+		return
+	}
+
+	intelMeta.Locked = true // Lock the intel file after annotation
+	intelMeta.UpdatedAt = time.Now().Unix()
+	intelMetaData, err := json.Marshal(intelMeta)
+	if err != nil {
+		http.Error(w, "Failed to marshal intel metadata", http.StatusInternalServerError)
+		return
+	}
+	if err := os.WriteFile("data/intel/"+intelMetaFile, intelMetaData, 0644); err != nil {
+		http.Error(w, "Failed to write intel metadata file", http.StatusInternalServerError)
+		return
+	}
+
+
+
+
 
 	html(withNavigation(pages.AnnotationSubmitted(filename))).Render(context.Background(), w)
 }
