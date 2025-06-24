@@ -46,22 +46,20 @@ templ IntelAnnotate(content []string, filename string) {
             if (!selectedText.length) {
                 return;
             }
+            window.selected_text.value = selectedText;
 
             const startedAt = range.startContainer;
-            const endedAt = range.endContainer;
-
-
             window.started_at.value = startedAt.textContent.trim();
+            
+            const endedAt = range.endContainer;
             window.ended_at.value = endedAt.textContent.trim();
-            console.log("Selection started at:", startedAt);
-            console.log("Selection ended at:", endedAt);
+
             const postionSelectionInContainerStart = range.startOffset;
-            const postionSelectionInContainerEnd = range.endOffset;
-            console.log("Selection start position in container:", postionSelectionInContainerStart);
-            console.log("Selection end position in container:", postionSelectionInContainerEnd);
             window.started_at_position.value = postionSelectionInContainerStart;
+
+            const postionSelectionInContainerEnd = range.endOffset;
             window.ended_at_position.value = postionSelectionInContainerEnd;
-            window.selected_text.value = selectedText;
+         
             window.annotate.showPopover();
         };
     </script>
